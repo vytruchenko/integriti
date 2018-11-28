@@ -1,0 +1,486 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="author" content="colorlib.com">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" />
+    <link href="css/main.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        
+  </head>
+  <body>
+    <div class="s007">
+      <form>
+        <div class="inner-form">
+          <div class="basic-search">
+            <div class="input-field">
+              <div class="icon-wrap">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" viewBox="0 0 20 20">
+                  <path d="M18.869 19.162l-5.943-6.484c1.339-1.401 2.075-3.233 2.075-5.178 0-2.003-0.78-3.887-2.197-5.303s-3.3-2.197-5.303-2.197-3.887 0.78-5.303 2.197-2.197 3.3-2.197 5.303 0.78 3.887 2.197 5.303 3.3 2.197 5.303 2.197c1.726 0 3.362-0.579 4.688-1.645l5.943 6.483c0.099 0.108 0.233 0.162 0.369 0.162 0.121 0 0.242-0.043 0.338-0.131 0.204-0.187 0.217-0.503 0.031-0.706zM1 7.5c0-3.584 2.916-6.5 6.5-6.5s6.5 2.916 6.5 6.5-2.916 6.5-6.5 6.5-6.5-2.916-6.5-6.5z"></path>
+                </svg>
+              </div>
+              <input id="search" type="text" placeholder="Search..." />
+            </div>
+          </div>
+          
+          <div class="advance-search">
+            
+                    <div class="results" id="results">
+                        <div id="header">
+                        <div class="absolute-positioning id-column">ID</div>
+                        <div class="absolute-positioning first-name-column">First Name</div>
+                        <div class="absolute-positioning second-name-column">Second Name</div>
+                        <div class="absolute-positioning last-modified-column">Last Modified</div>
+                        <div class="absolute-positioning edit">Edit</div>
+                        <div class="absolute-positioning cards-column">Cards</div><br>
+                        <hr style="background-color: grey; opacity: 0.5;">
+                        </div>
+                        
+                        <div id="demo"></div>
+                        
+                          <div id="cards-header" style="display: none;">
+                            <div id="back-button"></div>
+                            <div class="absolute-positioning id-column" id="current-cards-title"></div><br>
+                          <hr style="background-color: grey; opacity: 0.5;">
+                          </div>
+                          <div id="cards-field"></div>
+                        
+                        
+                        </div>
+                    
+                
+                
+                
+          </div>
+            
+        </div>
+      </form>
+    </div>
+    <script src="js/extention/choices.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+    <script>
+        
+        function displayAllUsers() {
+            return $.ajax({
+                          type: "GET",
+                          url: "https://cors-anywhere.herokuapp.com/https://slytunnel.com:1337/DB/User",
+                          headers: {
+                          "Authorization": "Basic " + btoa("Installer:installer"),
+                          },
+                          async: true,
+                          crossDomain: true,
+                          contentType: "text/xml; charset=\"utf-8\"",
+                          success: function(xmlResponse) {
+                          
+                          $(xmlResponse).find('User').each(function(){
+                            var addressid = $(this).find('Address').text();
+                            var fn = $(this).find('FirstName').text();
+                            var ln = $(this).find('SecondName').text();
+                            var modifieddate = $(this).find('ModifiedDate').text().slice(0,10) + ' ' + $(this).find('ModifiedDate').text().slice(12,16);
+                            if(addressid == '') {
+                             return true;
+                            }
+                            $('#demo').append('<div class="margin-input" id="' + addressid + '"><p><div class="absolute-positioning id-column" id="id-edit' + addressid + '">' + addressid + '</div><div class="absolute-positioning first-name-column" id="first-edit' + addressid + '">' + fn + '</div><div class="absolute-positioning second-name-column" id="second-edit' + addressid + '">' + ln + '</div><div class="absolute-positioning last-modified-column">' + modifieddate + '</div><div class="absolute-positioning cards-column tooltip id-cards" id="cards-edit' + addressid +'"><span class="tooltiptext">Edit Cards</span><i class="fas fa-id-card"></i></span></div><span class="edit tooltip" type="button" id="edit' + addressid + '"><span class="tooltiptext">Edit</span><i class="fas fa-pen"></i></span></p></div>' );
+                            });
+                          }
+                          });
+        }
+        $(document).ready(function(){
+                          displayAllUsers();
+                          
+                          $(document).on("keypress", "#search", function(e){
+                             if(e.which == 13) {
+                                 e.preventDefault();
+                                 var searchInputText = $("#search").val();
+                                  if(searchInputText != '') {
+                                    var searchInput = $("#search").val().split(' ');
+                                    var firstName = searchInput[0];
+                                    var secondName = searchInput[1];
+                                         
+                                    var urlFirst = "https://cors-anywhere.herokuapp.com/https://slytunnel.com:1337/DB/User?FirstName=" + firstName
+                                    var urlBoth = "https://cors-anywhere.herokuapp.com/https://slytunnel.com:1337/DB/User?FirstName=" + firstName + "&SecondName=" + secondName
+                                    var urlSecond = "https://cors-anywhere.herokuapp.com/https://slytunnel.com:1337/DB/User?SecondName=" + firstName
+                                         
+                                    if (searchInput.length == 1) {
+                                      var url = urlFirst;
+                                    }else if (searchInput.length == 2) {
+                                       var url = urlBoth;
+                                    }else {
+                                         alert("Incorrect parameters!");
+                                    }
+                                         
+                           function secondNameSearch() {
+                            return $.ajax({
+                              type: "GET",
+                              url: urlSecond,
+                              headers: {
+                                 "Authorization": "Basic " + btoa("Installer:installer"),
+                              },
+                              async: true,
+                              crossDomain: true,
+                              contentType: "text/xml; charset=\"utf-8\"",
+                              success: function(xmlResponse) {
+                                                       
+                              $(xmlResponse).find('User').each(function(){
+                                var addressid = $(this).find('Address').text();
+                                var fn = $(this).find('FirstName').text();
+                                var ln = $(this).find('SecondName').text();
+                                var modifieddate = $(this).find('ModifiedDate').text().slice(0,10) + ' ' + $(this).find('ModifiedDate').text().slice(12,16);
+                                var cards = '<span class="tooltiptext">Edit Cards</span><i class="fas fa-id-card"></i></span>';
+                                if(addressid == '') {
+                                   return true;
+                                 }
+                                $('#demo').append('<div class="margin-input" id="' + addressid + '"><p><div class="absolute-positioning id-column" id="id-edit' + addressid + '">' + addressid + '</div><div class="absolute-positioning first-name-column" id="first-edit' + addressid + '">' + fn + '</div><div class="absolute-positioning second-name-column" id="second-edit' + addressid + '">' + ln + '</div><div class="absolute-positioning last-modified-column">' + modifieddate + '</div><div class="absolute-positioning cards-column tooltip id-cards" id="cards-edit' + addressid +'"><span class="tooltiptext">Edit Cards</span><i class="fas fa-id-card"></i></span></div><span class="edit tooltip" type="button" id="edit' + addressid + '"><span class="tooltiptext">Edit</span><i class="fas fa-pen"></i></span></p></div>' );
+                                });
+                                }
+                              });
+                            }
+                                         
+                                         
+                                                
+                                                $.ajax({
+                                                       type: "GET",
+                                                       url: url,
+                                                       headers: {
+                                                       "Authorization": "Basic " + btoa("Installer:installer"),
+                                                       },
+                                                       async: true,
+                                                       crossDomain: true,
+                                                       contentType: "text/xml; charset=\"utf-8\"",
+                                                       success: function(xmlResponse) {
+                                                       if (xmlResponse == "[object XMLDocument]") {
+                                                       secondNameSearch();
+                                                       }
+                                                        $('#demo').empty();
+                                                       $(xmlResponse).find('User').each(function(){
+                                                                                        var addressid = $(this).find('Address').text();
+                                                                                        var fn = $(this).find('FirstName').text();
+                                                                                        var ln = $(this).find('SecondName').text();
+                                                                                        var modifieddate = $(this).find('ModifiedDate').text().slice(0,10) + ' ' + $(this).find('ModifiedDate').text().slice(12,16);
+                                                                                        var cards = '<span class="tooltiptext">Edit Cards</span><i class="fas fa-id-card"></i></span>';
+                                                                                        if(addressid == '') {
+                                                                                        return true;
+                                                                                        }
+                                                                                        $('#demo').append('<div class="margin-input" id="' + addressid + '"><p><div class="absolute-positioning id-column" id="id-edit' + addressid + '">' + addressid + '</div><div class="absolute-positioning first-name-column" id="first-edit' + addressid + '">' + fn + '</div><div class="absolute-positioning second-name-column" id="second-edit' + addressid + '">' + ln + '</div><div class="absolute-positioning last-modified-column">' + modifieddate + '</div><div class="absolute-positioning cards-column tooltip id-cards" id="cards-edit' + addressid +'"><span class="tooltiptext">Edit Cards</span><i class="fas fa-id-card"></i></span></div><span class="edit tooltip" type="button" id="edit' + addressid + '"><span class="tooltiptext">Edit</span><i class="fas fa-pen"></i></span></p></div>' );
+                                                                                        });
+                                                       }
+                                                       });
+                                         }else if (searchInputText == '') {
+                                         displayAllUsers();
+                                         }
+                                         }
+                          });
+ 
+                          $(document).on("click", ".edit", function(){
+                                         var buttonid = this.id;
+                                         var idstringbefore = buttonid.replace('edit','');
+                                         var idEditStringID = "#id-edit" + idstringbefore;
+                                         
+                                         var getFirstNameID = "#first-edit" + idstringbefore;
+                                          var firstNameEdit = $(getFirstNameID).text();
+                                         
+                                         var getSecondNameID = "#second-edit" + idstringbefore;
+                                         var secondNameEdit = $(getSecondNameID).text();
+                                         
+                                         
+                                         var getCardsID = "#cards-edit" + idstringbefore;
+                                         var cardsEdit = $(getCardsID).text();
+                                         
+                                         var getEditID = "#edit" + idstringbefore;
+                                         
+                                        
+                                         
+                                         $(getFirstNameID).replaceWith('<input type="text" class="absolute-positioning first-name-column fn-edit" id="inputfirstName' + idstringbefore + '" name="FirstName" value="' + firstNameEdit + '">');
+                                         
+                                         $(getSecondNameID).replaceWith('<input type="text" class="absolute-positioning second-name-column ln-edit" id="inputsecondName' + idstringbefore + '" name="SecondName" value="' + secondNameEdit + '">');
+                                         
+                                         //$(getCardsID).replaceWith('<div class="absolute-positioning cards-column" id="cards-edit' + idstringbefore +'">' + cardsEdit + ' <div class="tooltip" id="cards-edit' + idstringbefore +'"><span class="tooltiptext">Add card</span><i class="fas fa-plus-circle add-card"></i></div></div>');
+                                         
+                                         $(getEditID).replaceWith('<span class="edit saveEditedName tooltip" id="buttonToSave' + idstringbefore + '"><span class="tooltiptext">Save</span><i class="fas fa-save id-card"></i></span>');
+                                         
+                          });
+                          
+                          
+                          function saveEditedName(){
+                                         var buttonid = this.id;
+                                         var inputfirstNameID = "#" + buttonid.replace('buttonToSave','inputfirstName');
+                                         var inputsecondNameID = "#" + buttonid.replace('buttonToSave','inputsecondName');
+                                         var addressid = buttonid.replace('buttonToSave','');
+                                         
+                                         var firstName = $(inputfirstNameID).val();
+                                         var secondName = $(inputsecondNameID).val();
+                                         
+                                         var currentdate = new Date();
+                                         var modifieddate = currentdate.getFullYear() + "-" + (currentdate.getMonth()+1)  + "-" + currentdate.getDate() + " " + currentdate.getHours() + ":" + currentdate.getMinutes();
+                                         
+                                         var cards = 0;
+
+                                         
+                                         var divid = "#" + buttonid.replace('buttonToSave','');
+                                         $(divid).replaceWith( '<div class="margin-input" id="' + addressid + '"><p><div class="absolute-positioning id-column" id="id-edit' + addressid + '">' + addressid + '</div><div class="absolute-positioning first-name-column" id="first-edit' + addressid + '">' + firstName + '</div><div class="absolute-positioning second-name-column" id="second-edit' + addressid + '">' + secondName + '</div><div class="absolute-positioning last-modified-column">' + modifieddate + '</div><div class="absolute-positioning cards-column tooltip id-cards" id="cards-edit' + addressid +'"><span class="tooltiptext">Edit Cards</span><i class="fas fa-id-card"></i></span></div><span class="edit tooltip" type="button" id="edit' + addressid + '"><span class="tooltiptext">Edit</span><i class="fas fa-pen"></i></span></p></div>' );
+                                         
+                                         var xmlToSend = "<User Address=" + addressid + "><FirstName>" + firstName + "</FirstName><SecondName>" + secondName + "</SecondName></User>";
+                                         
+                                         $.ajax({
+                                                type: "POST",
+                                                url: "https://cors-anywhere.herokuapp.com/https://slytunnel.com:1337/DB/User",
+                                                headers: {
+                                                "Authorization": "Basic " + btoa("Installer:installer"),
+                                                },
+                                                contentType: "application/xml",
+                                                data: '<User Address="' + addressid + '"><FirstName>' + firstName +'</FirstName><SecondName>' + secondName + '</SecondName></User>',
+                                                async: true,
+                                                crossDomain: true,
+                                                contentType: "text/xml; charset=\"utf-8\"",
+                                                success: function(xmlResponse) {
+                                                
+                                                },
+                                                error: function( jqXhr, textStatus, errorThrown ){
+                                                console.log( errorThrown );
+                                                }
+                                                });
+                                              
+                                         }
+                          
+                          $(document).on("click", ".saveEditedName", saveEditedName);
+                          $(document).on("click", ".id-cards", function(){
+                            
+                            
+                                         var addressidbefore = this.id;
+                                         var addressid = addressidbefore.replace('cards-edit','');
+                                         console.log("addressid: " + addressid);
+
+                                         function deleteCard(){
+                                           var cardid = this.id;
+
+                                           $.ajax({
+                                                type: "GET",
+                                                url: url,
+                                                headers: {
+                                                "Authorization": "Basic " + btoa("Installer:installer"),
+                                                },
+                                                async: false,
+                                                crossDomain: true,
+                                                contentType: "text/xml; charset=\"utf-8\"",
+                                                success: function(xmlResponse) {
+                                                $(xmlResponse).find('User').each(function(){
+                                                    
+                                                    var xmlAddress = $(this).find('Address').text();
+                                                    if (xmlAddress == addressid) {
+                                                      allCardsDelete = '';
+                                                      $(this).find('Cards').each(function(){
+                                                        $(this).find('Card').each(function(){
+                                                          var cardid = $(this).find('ID').text();
+                                                                                                                                      
+                                                          allCardsDelete = allCardsDelete + '<Card><ID>' + cardid + '</ID></Card>#';
+                                                              
+                                                          });
+                                                        });
+                                                    
+                                                    }
+                                                  });
+                                          }
+                                         });
+                                        
+                                           var cardsArray = allCardsDelete.split('#');
+                                            var idArray = allCardsDelete.split('</ID></Card>#<Card><ID>');
+                                           var numberOfCards = ((cardsArray.length)-2);
+                                           var i = 0;
+                                           idArray[0] = (idArray[0]).replace('<Card><ID>','');
+                                           idArray[numberOfCards] = (idArray[numberOfCards]).replace('</ID></Card>#','');
+                                           var j = 0;
+
+
+                                           for (i=0; i<numberOfCards; ++i) {
+                                            if (idArray[i] == cardid){
+                                              j = i;
+                                            }
+                                          }
+
+                                          var newXML = "";
+                                           for (i=0; i<(numberOfCards+1); ++i) {
+                                             if (i != j) {
+                                               newXML = newXML + cardsArray[i];
+                                             }
+                                           }
+
+                                           $.ajax({
+                                                 type: "POST",
+                                                 url: "https://cors-anywhere.herokuapp.com/https://slytunnel.com:1337/DB/User",
+                                                 headers: {
+                                                 "Authorization": "Basic " + btoa("Installer:installer"),
+                                                  },
+                                                 contentType: "application/xml",
+                                                 data: '<User Address="' + addressid + '"><Cards>' + newXML + '</Cards></User>',
+                                                 async: false,
+                                                 crossDomain: true,
+                                                  contentType: "text/xml; charset=\"utf-8\"",
+                                                  success: function(xmlResponse) {
+                                                    alert("Your card has been deleted");
+                                                  }                                           
+                                                });
+                                                $(this).parent().remove();
+                                         }
+                                         function createNewCard () {
+                                           var clickedElement = this.id;
+                                           console.log("Clicked element : " + clickedElement);
+
+                                           $.ajax({
+                                                type: "GET",
+                                                url: url,
+                                                headers: {
+                                                "Authorization": "Basic " + btoa("Installer:installer"),
+                                                },
+                                                async: false,
+                                                crossDomain: true,
+                                                contentType: "text/xml; charset=\"utf-8\"",
+                                                success: function(xmlResponse) {
+                                                $(xmlResponse).find('User').each(function(){
+                                                    var firstName = $(this).find('FirstName').text();
+                                                    var secondName = $(this).find('SecondName').text();
+                                                    var xmlAddress = $(this).find('Address').text();
+                                                    if (xmlAddress == addressid) {
+                                                      allcards = '';
+                                                      $(this).find('Cards').each(function(){
+                                                        $(this).find('Card').each(function(){
+                                                          var cardid = $(this).find('ID').text();
+                                                                                                                                      
+                                                          allcards = allcards + '<Card><ID>' + cardid + '</ID></Card>';
+                                                                     
+                                                          });
+                                                        });
+                                                    
+                                                    }
+                                                  });
+                                          }
+                                         });
+                                                                                             
+                                          $.ajax({
+                                              type: "POST",
+                                              url: "https://cors-anywhere.herokuapp.com/https://slytunnel.com:1337/DB/User",
+                                              headers: {
+                                                "Authorization": "Basic " + btoa("Installer:installer"),
+                                              },
+                                              contentType: "application/xml",
+                                              data: '<User Address="' + addressid + '"><Cards>' + allcards + '<Card></Card></Cards></User>',
+                                              async: false,
+                                              crossDomain: true,
+                                              contentType: "text/xml; charset=\"utf-8\"",
+                                              success: function(xmlResponse) {
+                                                 alert("New card has been created!" );
+                                              }
+                                                                                                                                                       
+                                          });
+                                                                                                                                                
+                                          var lastCardID = "";
+                                          var firstName = "";
+                                          var secondName = "";
+                                          var cardstate = "Active";
+                                          var cardtype = "Integriti Test";
+                                          var cardnumber = "123-456-789";
+                                          
+                                          $.ajax({
+                                              type: "GET",
+                                              url: url,
+                                              headers: {
+                                               "Authorization": "Basic " + btoa("Installer:installer"),
+                                              },
+                                              async: false,
+                                              crossDomain: true,
+                                              contentType: "text/xml; charset=\"utf-8\"",
+                                              success: function(xmlResponse) {
+                                              $(xmlResponse).find('User').each(function(){
+                                              var xmlAddress = $(this).find('Address').text();
+                                                 if (xmlAddress == addressid) {
+                                                    var firstNametest = $(this).find('FirstName').text();
+                                                    firstName = firstNametest;
+                                                    secondName = $(this).find('SecondName').text();
+                                                    $(this).find('Cards').each(function(){
+                                                       $(this).find('Card').each(function(){
+                                                           var lastcard = $(this).find('ID').text();
+                                                            lastCardID = lastcard;
+                                                        });
+                                                      });
+                                                    }                                                                                             
+                                                });
+                                                                                                                                                              
+                                               }
+                                            });
+
+                                          $("#newCardClicked").replaceWith('<div class="card">ID:<div class="card-input">' + lastCardID + '</div><br><br><br><br>Name:<div class="card-input">' + firstName + ' ' + secondName + '</div><br><br>State:<div class="card-input">' + cardstate + '</div><br><br>Card Number: <div class="card-input">' + cardnumber + '</div><i class="edit-card fas fa-trash-alt delete-card"></i></div>');
+                                          $("#cards-field").append('<div type="button" class="card add-card" id="newCardClicked"><br><br><br><br><center><i class="fas fa-plus-circle"></i><br><br>Add Card</center></div>');
+                                          
+                                          var test = $("#cards-field").html();
+                                          }
+                                                                                                
+                                                                                                
+                                                                                              
+                                         $("#header").hide();
+                                         $("#demo").hide();
+                                         $(".input-field").hide();
+                                         $("#cards-header").show();
+                                         $("#back-button").append('<div><i class="fas fa-long-arrow-alt-left" id="goback"></i></div>');
+                                         var url = "https://cors-anywhere.herokuapp.com/https://slytunnel.com:1337/DB/User?Address=" + addressid;
+                                         var allcards = '';
+                                         var allCardsDelete = '';
+                                         $.ajax({
+                                                type: "GET",
+                                                url: url,
+                                                headers: {
+                                                "Authorization": "Basic " + btoa("Installer:installer"),
+                                                },
+                                                async: true,
+                                                crossDomain: true,
+                                                contentType: "text/xml; charset=\"utf-8\"",
+                                                success: function(xmlResponse) {
+                                                $(xmlResponse).find('User').each(function(){
+                                                    var firstName = $(this).find('FirstName').text();
+                                                    var secondName = $(this).find('SecondName').text();
+                                                    var xmlAddress = $(this).find('Address').text();
+                                                    if (xmlAddress == addressid) {
+                                                      allcards = '';
+                                                      allCardsDelete = '';
+                                                      $("#current-cards-title").append('<div>' + firstName + ' ' + secondName + '\'s Cards</div>');
+                                                      $(this).find('Cards').each(function(){
+                                                        $(this).find('Card').each(function(){
+                                                          var cardid = $(this).find('ID').text();
+                                                          var cardstate = "Active";
+                                                          var cardtype = "Integriti Test";
+                                                          var cardnumber = "123-456-789";
+                                                                                                                                      
+                                                          allcards = allcards + '<Card><ID>' + cardid + '</ID></Card>';
+                                                          allCardsDelete = allCardsDelete + '<Card><ID>' + cardid + '</ID></Card>#';
+
+                                                          //Filled card
+                                                           if (cardid != '') {
+                                                              $("#cards-field").append('<div class="card">ID:<div class="card-input">' + cardid + '</div><br><br><br><br>Name:<div class="card-input">' + firstName + ' ' + secondName + '</div><br><br>State:<div class="card-input">' + cardstate + '</div><br><br>Card Number: <div class="card-input">' + cardnumber + '</div><i class="edit-card fas fa-trash-alt delete-card" id="' + cardid + '"></i></div>');
+                                                            }                                                                         
+                                                          });
+                                                        });
+                                                      //New card
+                                                      $("#cards-field").append('<div type="button" class="card add-card" id="newCardClicked"><br><br><br><br><center><i class="fas fa-plus-circle"></i><br><br>Add Card</center></div>');                    
+                                                    
+                                                    }
+                                                  });
+                                          }
+                                         });
+
+                                         $(document).on("click", ".add-card",  createNewCard);
+                                         console.log("End of cards functions" + addressid);
+                                          $(document).on("click", ".delete-card",  deleteCard);
+                                                
+                                         
+                                         
+                             });
+
+                             $(document).on("click", "#goback", function(){
+                                 location.reload();
+                              });
+                          
+        });
+
+    </script>
+  </body>
+</html>
